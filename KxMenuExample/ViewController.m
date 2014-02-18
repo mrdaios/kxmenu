@@ -114,41 +114,48 @@
     NSArray *menuItems =
     @[
       
-      [KxMenuItem menuItem:@"ACTION MENU 1234456"
+      [KxMenuItem menuItem:@"ACTION MENU"
                      image:nil
-                    target:nil
-                    action:NULL],
+             selectedBlock:nil],
             
       [KxMenuItem menuItem:@"Share this"
                      image:[UIImage imageNamed:@"action_icon"]
-                    target:self
-                    action:@selector(pushMenuItem:)],
+             selectedBlock:^(KxMenuItem *item) {
+                 NSLog(@"2");
+             }],
       
       [KxMenuItem menuItem:@"Check this menu"
                      image:nil
-                    target:self
-                    action:@selector(pushMenuItem:)],
+             selectedBlock:^(KxMenuItem *item) {
+                 NSLog(@"3");
+             }],
       
       [KxMenuItem menuItem:@"Reload page"
                      image:[UIImage imageNamed:@"reload"]
-                    target:self
-                    action:@selector(pushMenuItem:)],
+             selectedBlock:^(KxMenuItem *item) {
+                 NSLog(@"4");
+             }],
       
       [KxMenuItem menuItem:@"Search"
                      image:[UIImage imageNamed:@"search_icon"]
-                    target:self
-                    action:@selector(pushMenuItem:)],
+             selectedBlock:^(KxMenuItem *item) {
+                 NSLog(@"5");
+             }],
       
       [KxMenuItem menuItem:@"Go home"
                      image:[UIImage imageNamed:@"home_icon"]
-                    target:self
-                    action:@selector(pushMenuItem:)],
+             selectedBlock:^(KxMenuItem *item) {
+                                  NSLog(@"6");
+             }],
       ];
     
     KxMenuItem *first = menuItems[0];
     first.foreColor = [UIColor colorWithRed:47/255.0f green:112/255.0f blue:225/255.0f alpha:1.0];
     first.alignment = NSTextAlignmentCenter;
-    
+    [KxMenu setSelecteColor:[UIColor redColor]];
+    [KxMenu setTintColor:[UIColor colorWithRed:0.027 green:0.494 blue:1.000 alpha:1]];
+    [KxMenu setTitleFont:[UIFont systemFontOfSize:10]];
+    [KxMenu setSeparatoryColor:[UIColor redColor]];
     [KxMenu showMenuInView:self.view
                   fromRect:sender.frame
                  menuItems:menuItems];

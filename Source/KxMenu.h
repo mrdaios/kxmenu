@@ -36,17 +36,15 @@
 
 @interface KxMenuItem : NSObject
 
-@property (readwrite, nonatomic, strong) UIImage *image;
-@property (readwrite, nonatomic, strong) NSString *title;
-@property (readwrite, nonatomic, weak) id target;
-@property (readwrite, nonatomic) SEL action;
-@property (readwrite, nonatomic, strong) UIColor *foreColor;
-@property (readwrite, nonatomic) NSTextAlignment alignment;
+@property (nonatomic, strong) UIImage         *image;
+@property (nonatomic, strong) NSString        *title;
+@property (nonatomic, strong) UIColor         *foreColor; //字体颜色
+@property (nonatomic, assign) NSTextAlignment alignment;
+@property (nonatomic, copy) void (^selectedBlock)(KxMenuItem *item);
 
 + (instancetype) menuItem:(NSString *) title
                     image:(UIImage *) image
-                   target:(id)target
-                   action:(SEL) action;
+            selectedBlock:(void(^)(KxMenuItem *item))selectedBlock;
 
 @end
 
@@ -58,10 +56,32 @@
 
 + (void) dismissMenu;
 
+/**
+ *  kxMenu背景
+ *
+ */
 + (UIColor *) tintColor;
 + (void) setTintColor: (UIColor *) tintColor;
 
+/**
+ *  kxMenu title字体
+ *
+ */
 + (UIFont *) titleFont;
 + (void) setTitleFont: (UIFont *) titleFont;
+
+/**
+ *  kxMenu Item 选中背景
+ *
+ */
++(UIColor *)selectedColor;
++ (void) setSelecteColor:(UIColor *)selectedColor;
+
+/**
+ *  kxMenu 分割线颜色
+ *
+ */
++(UIColor *)separatoryColor;
++(void)setSeparatoryColor:(UIColor *)separatorColor;
 
 @end

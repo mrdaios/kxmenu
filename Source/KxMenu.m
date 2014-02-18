@@ -52,8 +52,6 @@ const CGFloat kArrowSize = 12.f;
 
 @implementation KxMenuOverlay
 
-// - (void) dealloc { NSLog(@"dealloc %@", self); }
-
 - (id)initWithFrame:(CGRect)frame
 {
     self = [super initWithFrame:frame];
@@ -88,47 +86,39 @@ const CGFloat kArrowSize = 12.f;
 
 @implementation KxMenuItem
 
+
 + (instancetype) menuItem:(NSString *) title
                     image:(UIImage *) image
-                   target:(id)target
-                   action:(SEL) action
+            selectedBlock:(void(^)(KxMenuItem *item))selectedBlock
 {
     return [[KxMenuItem alloc] init:title
                               image:image
-                             target:target
-                             action:action];
+                      selectedBlock:selectedBlock];
 }
 
-- (id) init:(NSString *) title
-      image:(UIImage *) image
-     target:(id)target
-     action:(SEL) action
+- (id) init:(NSString *) title image:(UIImage *) image selectedBlock:(void(^)(KxMenuItem *item))selectedBlock
 {
     NSParameterAssert(title.length || image);
     
     self = [super init];
     if (self) {
-        
         _title = title;
         _image = image;
-        _target = target;
-        _action = action;
+        _selectedBlock = selectedBlock;
     }
     return self;
 }
 
 - (BOOL) enabled
 {
-    return _target != nil && _action != NULL;
+    return (nil != _selectedBlock);
 }
 
 - (void) performAction
 {
-    __strong id target = self.target;
-    
-    if (target && [target respondsToSelector:_action]) {
-        
-        [target performSelectorOnMainThread:_action withObject:self waitUntilDone:YES];
+    if (_selectedBlock)
+    {
+        _selectedBlock(self);
     }
 }
 
@@ -169,9 +159,9 @@ typedef enum {
         self.opaque = YES;
         self.alpha = 0;
         
-        self.layer.shadowOpacity = 0.5;
-        self.layer.shadowOffset = CGSizeMake(2, 2);
-        self.layer.shadowRadius = 2;
+//        self.layer.shadowOpacity = 0.5;
+//        self.layer.shadowOffset = CGSizeMake(2, 2);
+//        self.layer.shadowRadius = 2;
     }
     
     return self;
@@ -416,7 +406,7 @@ typedef enum {
     
     for (KxMenuItem *menuItem in _menuItems) {
 
-        const CGSize titleSize = [menuItem.title sizeWithFont:titleFont];
+        const CGSize titleSize = [menuItem.title sizeWithAttributes:@{NSFontAttributeName: titleFont}];
         const CGSize imageSize = menuItem.image.size;
 
         const CGFloat itemHeight = MAX(titleSize.height, imageSize.height) + kMarginY * 2;
@@ -575,6 +565,14 @@ typedef enum {
         0.216, 0.471, 0.871, 1,
         0.059, 0.353, 0.839, 1,
     };
+    UIColor *selectedColor = [KxMenu selectedColor];
+    if (selectedColor)
+    {
+        CGFloat R0 = 0.267, G0 = 0.303, B0 = 0.335, A0=1;
+        [selectedColor getRed:&R0 green:&G0 blue:&B0 alpha:&A0];
+        const CGFloat componentsNew[] = {R0,G0,B0,A0,R0,G0,B0,A0};
+        return [self gradientImageWithSize:size locations:locations components:componentsNew count:2];
+    }
     
     return [self gradientImageWithSize:size locations:locations components:components count:2];
 }
@@ -593,6 +591,21 @@ typedef enum {
         R,G,B,0.1
     };
     
+    UIColor *separatoryColor = [KxMenu separatoryColor];
+    if (separatoryColor)
+    {
+        CGFloat R0 = 0.267, G0 = 0.303, B0 = 0.335, A0=1;
+        [separatoryColor getRed:&R0 green:&G0 blue:&B0 alpha:&A0];
+        const CGFloat components[20] = {
+            R0,G0,B0,0.1,
+            R0,G0,B0,0.4,
+            R0,G0,B0,0.7,
+            R0,G0,B0,0.4,
+            R0,G0,B0,0.1
+        };
+        return [self gradientImageWithSize:size locations:locations components:components count:5];
+    }
+    
     return [self gradientImageWithSize:size locations:locations components:components count:5];
 }
 
@@ -605,7 +618,7 @@ typedef enum {
     CGContextRef context = UIGraphicsGetCurrentContext();
     
     CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
-    CGGradientRef colorGradient = CGGradientCreateWithColorComponents(colorSpace, components, locations, 2);
+    CGGradientRef colorGradient = CGGradientCreateWithColorComponents(colorSpace, components, locations, count);
     CGColorSpaceRelease(colorSpace);
     CGContextDrawLinearGradient(context, colorGradient, (CGPoint){0, 0}, (CGPoint){size.width, 0}, 0);
     CGGradientRelease(colorGradient);
@@ -632,6 +645,7 @@ typedef enum {
         
         CGFloat a;
         [tintColor getRed:&R0 green:&G0 blue:&B0 alpha:&a];
+        [tintColor getRed:&R1 green:&G1 blue:&B1 alpha:&a];
     }
     
     CGFloat X0 = frame.origin.x;
@@ -767,6 +781,8 @@ typedef enum {
 static KxMenu *gMenu;
 static UIColor *gTintColor;
 static UIFont *gTitleFont;
+static UIColor *gselectedColor;
+static UIColor *gseparatorColor;
 
 @implementation KxMenu {
     
@@ -882,6 +898,30 @@ static UIFont *gTitleFont;
 {
     if (titleFont != gTitleFont) {
         gTitleFont = titleFont;
+    }
+}
+
++(UIColor *)selectedColor
+{
+    return gselectedColor;
+}
+
++(void)setSelecteColor:(UIColor *)selectedColor
+{
+    if (selectedColor !=gselectedColor) {
+        gselectedColor = selectedColor;
+    }
+}
+
++(UIColor *)separatoryColor
+{
+    return gseparatorColor;
+}
++(void)setSeparatoryColor:(UIColor *)separatorColor
+{
+    if (separatorColor != gseparatorColor)
+    {
+        gseparatorColor = separatorColor;
     }
 }
 
